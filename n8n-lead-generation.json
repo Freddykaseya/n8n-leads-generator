@@ -1,0 +1,562 @@
+{
+  "name": "my workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        80,
+        300
+      ],
+      "id": "5af4bc4f-7b3d-4ebe-8973-c3cdd0481da7",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "API_KEY=your-api-key-here",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Google Maps Lead Generation Agent ",
+        "height": 500,
+        "width": 740
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        -40
+      ],
+      "id": "b39ea85a-ce5c-44d6-8722-8f9dfb05917c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "name": "mapSearcher",
+        "description": "Execute cet outil pour trouver les informations sur google maps",
+        "workflowId": {
+          "__rl": true,
+          "value": "ZecWF6ZKT2VWz688",
+          "mode": "list",
+          "cachedResultName": "my workflow"
+        },
+        "fields": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        300
+      ],
+      "id": "351baf8a-5085-4668-9b3e-7873e7c2a9fc",
+      "name": "mapSearcher",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        200,
+        300
+      ],
+      "id": "01767b1a-a6d8-4431-84df-907acedcf9e8",
+      "name": "Window Buffer Memory",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Voici la demande de l'utilisateur : {{ $json.chatInput }}\n\n",
+        "options": {
+          "systemMessage": "=# Rôle\nTu es un assistant intelligent pour la génération de leads.\n\n# Objectif\nExtraire une requête de recherche d’entreprises situées exclusivement au Maroc, en extrayant le type d’entreprise et la ville du message utilisateur.\n\n# Instructions\nFormate uniquement la requête finale dans ce JSON :\n\n{\n  \"q\": \"<type d'entreprise> <ville> Maroc\"\n}\n\n# Exemple\nMessage utilisateur : \"je cherche un cabinet marketing à Casablanca\"\n→ Résultat JSON :\n{\n  \"q\": \"cabinet marketing Casablanca Maroc\"\n}\n\n# Attention\n- Si la ville n’est pas précisée, utilise \"Casablanca\" par défaut.\n- Tu dois toujours ajouter \"Maroc\" à la fin de la requête.\n\n# Important\nTu ne dois retourner que ce JSON et rien d'autre.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        120,
+        80
+      ],
+      "id": "34f412a6-bbc9-450d-928e-32a9c5046d04",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -140,
+        80
+      ],
+      "id": "097353c6-9d34-46c0-8799-a24f4c4a1461",
+      "name": "When chat message received",
+      "webhookId": "95674c1b-d07c-45df-bddf-43b4e18d121d"
+    },
+    {
+      "parameters": {
+        "content": "## Scraping Google Maps Tool (mapSearcher)",
+        "height": 280,
+        "width": 1320,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -310,
+        420
+      ],
+      "id": "aaaee02b-0d4e-4752-8f12-dc31a7eef434",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://google.serper.dev/maps",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-KEY",
+              "value": "API_KEY=your-api-key-here"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={\n  \"q\": \"{{ $json.q }}\",\n  \"type\": \"maps\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -20,
+        520
+      ],
+      "id": "a7c22035-9aaa-41ed-b0db-c7083d58b0c6",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1d6BeVLL_tAGtgpZNGg9_G2_Iu_Dq0q64SOKxO8Pn_Ys",
+          "mode": "list",
+          "cachedResultName": "FCI25",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1d6BeVLL_tAGtgpZNGg9_G2_Iu_Dq0q64SOKxO8Pn_Ys/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "maps",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1d6BeVLL_tAGtgpZNGg9_G2_Iu_Dq0q64SOKxO8Pn_Ys/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{$json[\"name\"]}}",
+            "type": "={{$json[\"type\"]}}",
+            "Site web ": "={{$json[\"website\"]}}",
+            "email": "={{$json[\"email\"]}}",
+            "phone": "={{$json[\"phone\"]}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Site web ",
+              "displayName": "Site web ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1460,
+        540
+      ],
+      "id": "08a77055-021a-470f-b0cd-1421b98fa2b6",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "API_KEY=your-api-key-here",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "places",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        200,
+        520
+      ],
+      "id": "dceffb5c-b880-43d9-acef-4aa1e3eebc0e",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "32ae5a01-e221-4234-807f-0a8e1e18dc70",
+              "leftValue": "={{$json[\"website\"]}}",
+              "rightValue": "http",
+              "operator": {
+                "type": "string",
+                "operation": "startsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        540
+      ],
+      "id": "491dfb9c-74b4-45de-88d0-b2dd08e8fbf3",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": " http://localhost:3000/content",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{$json.website}}\",\n  \"gotoOptions\": {\n    \"waitUntil\": \"networkidle2\"\n  }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        380
+      ],
+      "id": "4cf43446-67d7-49ec-a54f-334dbc3d4091",
+      "name": "HTTP Request",
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        500
+      ],
+      "id": "2ddb401c-95b8-4887-b0fc-0dfe21f2423c",
+      "name": "Wait",
+      "webhookId": "68693ab9-3c77-485c-95d5-74931296d128"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1040,
+        540
+      ],
+      "id": "3269bd0a-f429-4655-92c6-f1261f055802",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const html = $json.data || '';\n\nconst emailRegex = /[a-zA-Z0-9._%+-]+@(?!gmail\\.com|yahoo\\.fr|hotmail\\.com)([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})/g;\nconst phoneRegex = /(?:\\+?\\d{1,3}[\\s\\-]?)?(?:\\(?\\d{2,4}\\)?[\\s\\-]?)?\\d{2,4}[\\s\\-]?\\d{2,4}[\\s\\-]?\\d{2,4}/g;\n\nconst emails = (html.match(emailRegex) || []).filter(e => e.length > 5);\nconst phones = (html.match(phoneRegex) || []).filter(p => p.replace(/\\D/g, '').length >= 8);\n\n// Si aucun email professionnel => skip l’item\nif (emails.length === 0) {\n  return null; // Ignore cet item dans le workflow\n}\n\n// Retourne UN SEUL objet (obligatoire pour \"Run Once for Each Item\")\nreturn {\n  json: {\n    name: $json.title || 'Entreprise inconnue',\n    type: $json.type || 'non défini',\n    website: $json.website || '',\n    email: emails[0],\n    phone: phones[0] || ''\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1240,
+        540
+      ],
+      "id": "582a517c-c99d-4550-8941-a8b18ccdfd79",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fa2e671e-a9e2-42d7-bee5-9c43229fffbd",
+              "name": "q",
+              "value": "={{ JSON.parse($json.output).q }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        80
+      ],
+      "id": "c8b2b9ef-65c2-4375-90e4-a66e9eb8377c",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mapSearcher": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9e68f8c9-846e-4234-834e-0bfba7c0ed9f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cce916644f74ad33d6b65ba61780e7ddf3f3cbb259730818af3527b13a166eb1"
+  },
+  "id": "ZecWF6ZKT2VWz688",
+  "tags": []
+}
